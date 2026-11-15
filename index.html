@@ -122,6 +122,24 @@ code{font-family:var(--f-mono);font-size:.92em;background:var(--panel2);padding:
 .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .credit{font-size:12px;color:var(--muted);margin:0}
 .stg.locked{opacity:.55}
+.prep-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.prep-head span{font:13px/1.3 var(--f-display);color:var(--muted)}
+.prep-dots{display:flex;gap:5px;margin-left:auto}
+.prep-dots i{width:22px;height:8px;border-radius:4px;background:var(--line)}
+.prep-dots i.on{background:var(--coin)}.prep-dots i.done{background:var(--go)}
+.prep-word{display:inline-block;font:15px/1.3 var(--f-mono);background:var(--coin);color:#141a45;border-radius:5px;padding:2px 10px;margin-bottom:6px;font-weight:700}
+.prep-exp{margin:0 0 10px;font-size:16px;line-height:1.8}
+.prep-task{margin:0 0 6px;font-weight:700}
+.type-me{font:17px/1.6 var(--f-mono);background:#0b1029;border:2px solid var(--line);border-radius:8px;padding:10px 14px;color:#d9e1ff;overflow-x:auto;white-space:pre;user-select:none;-webkit-user-select:none}
+.type-me mark{background:rgb(255 204 51 / .28);color:#ffe08a;border-radius:3px;padding:1px 2px}
+.type-me small{display:block;font:12px/1.4 var(--f-body);color:var(--muted);margin-top:4px}
+.prep-ok{margin-top:12px;border:3px solid var(--go);border-radius:10px;padding:10px 14px;background:rgb(62 224 143 / .12)}
+.prep-ok p{margin:0 0 8px}
+.prep-ok b{color:var(--go);font-family:var(--f-display);font-weight:400;font-size:17px}
+.prep-recap{margin:14px 0 0;padding:10px 0 0;border-top:1px dashed var(--line);list-style:none;display:grid;gap:3px;font-size:13px;color:var(--muted)}
+.prep-recap::before{content:"ここまでに覚えたこと";font:12px/1.4 var(--f-display);color:var(--muted)}
+:where(.world.prep #layer div:not([class])){width:64px;height:24px;box-sizing:border-box;border:2px dashed #1a2248;background:rgb(255 255 255 / .4)}
+:where(.world.prep #layer div:not([class]))::after{content:"箱";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:12px/1 var(--f-display);color:#1a2248}
 .js-on{margin-top:14px;border:3px solid var(--go);border-radius:10px;padding:12px 16px;text-align:center;background:rgb(62 224 143 / .12)}
 .js-on p{margin:0 0 10px}
 .js-on .btn{font:22px/1.2 var(--f-display);padding:10px 28px;animation:pulse 1s ease-in-out infinite alternate}
@@ -344,33 +362,48 @@ const GLOSS = `<details class="memo-box"><summary>ことばメモ（class・タ�
 <dt>コメント</dt><dd>HTMLは <code>&lt;!-- --&gt;</code>、CSSは <code>/* */</code>、JavaScriptは <code>//</code> のあとがコメント。ゲームには出てこない、人が読むためのメモです。</dd>
 </dl></details>`;
 
-const PREP_MISSION = `<h2>じゅんび編　ステージをつくろう</h2>
-<p class="lead">主人公は三筑中のキャラクター「さんちゃん」。まずは HTML と CSS だけで、ステージをつくります。さんちゃんはまだ動きません。4つできたら、JavaScript をオンにして動かそう。</p>
-<ol>
-<li data-check="P1"><strong>足場を置こう（HTML）</strong><br>下のコードをコピーして、HTMLの「ここに足場のコードを貼り付けよう」の下に貼り付け、<b>反映する</b>をおそう。
-${snip('<div class="block" style="left: 300px; bottom: 90px;"></div>')}
-<span class="memo"><code>left</code> は左からの距離、<code>bottom</code> は下からの高さです（単位 px）。</span></li>
-<li data-check="P2"><strong>足場をもう1つ置いて、点線のわくに動かそう（HTML）</strong><br>同じ行をもう1つ貼り付け、<code>left</code> と <code>bottom</code> の数字を変えて、画面の点線のわくに重ねよう。
-<details><summary>ヒント</summary>わくは、左から140px、下から220pxのところにあります。<code>left: 140px; bottom: 220px;</code></details></li>
-<li data-check="P3"><strong>足場の色を変えよう（CSS）</strong><br>CSSタブを開き、<code>.block</code> の <code>background-color</code> を好きな色に変えて反映。2つの足場がいっしょに変わることをたしかめよう。<code>#3fa7ff</code> や <code>hotpink</code> のように書きます。</li>
-<li data-check="P4"><strong>さんちゃんを自分の色にしよう（CSS）</strong><br><code>#player</code> の <code>background-color</code> を好きな色に。体の色が変わります。</li>
-</ol>
-<div class="js-on" id="jsOn" hidden>
-<p><b>じゅんび完了！</b> HTMLで部品を置き、CSSで見た目を決めました。足りないのは「動き」だけ。</p>
-<button class="btn main-btn" id="jsOnBtn" type="button">JavaScript をオン</button>
-</div>
-<div class="explain">
-<h3>class（クラス）ってなに？</h3>
-<p><code>class</code> は、部品につける<b>「種類の名前」</b>です。HTMLで名前をつけ、CSSでその名前の部品の見た目を決めます。</p>
-<div class="pair">
-<div><b>HTML</b><code>&lt;div <mark>class="block"</mark> style="…"&gt;&lt;/div&gt;</code><span>「この部品は block（足場）です」と名前をつける</span></div>
-<div><b>CSS</b><code><mark>.block</mark> { background-color: #c9853f; }</code><span>「block という名前の部品は、全部この色」と決める。CSSでは名前の前に <code>.</code>（ドット）をつける</span></div>
-</div>
-<p>同じ class の部品は、CSSを1か所変えるだけで全部いっしょに変わります。このゲームでは、class の名前で部品の役割も決まります。</p>
-<ul class="names"><li><code>block</code> 足場</li><li><code>gem</code> 宝石</li><li><code>door</code> 扉</li><li>ほかの名前は、先のステージで登場します</li></ul>
-</div>
-<p class="memo">時間があまったら、足場を増やしたり、色を変えたりして、ステージをかざろう。</p>
-<p class="memo"><button class="btn" id="prepSkip" type="button" style="font-size:12px;padding:2px 10px">じゅんび編をとばす</button></p>`;
+const PREP_HTML = `<!-- この下に、コードを入力しよう -->
+
+`;
+const TUT_EXTRA = `
+<!-- 制作者より：コードの中の「コメント」には、
+     ヒントや秘密がかくれていることがあるよ。 -->
+
+<!-- 宝石（ふれるとゲット！） -->
+<div class="gem" style="left: 860px; bottom: 340px;"></div>
+`;
+/* じゅんび編：1ステップに1つだけ、新しいことばを学ぶ。code は見本（<mark>が今回書き足すところ） */
+const PREP_STEPS = [
+ { title:'箱をつくろう', word:'&lt;div&gt;', tab:'html',
+   exp:'<code>&lt;div&gt;</code> は、画面に置く<b>「部品の箱」</b>をつくるタグです。<code>&lt;div&gt;</code> で始めて、<code>&lt;/div&gt;</code> で終わります。',
+   task:'HTMLに、下のとおり入力して「反映する」をおそう。', code:'<mark>&lt;div&gt;&lt;/div&gt;</mark>',
+   ok:'点線の箱があらわれた。まだ名前のない、ただの箱です。', recap:'<code>&lt;div&gt;&lt;/div&gt;</code>　部品の箱をつくる' },
+ { title:'箱に名前をつけよう', word:'class', tab:'html',
+   exp:'<code>class</code> は、箱につける<b>「種類の名前」</b>です。このゲームでは <code>block</code> という名前をつけると、箱が足場になります。',
+   task:'さっきの <code>&lt;div</code> のあとに、書き足そう。', code:'&lt;div <mark>class="block"</mark>&gt;&lt;/div&gt;',
+   ok:'箱が足場になった。でも、場所がまだ左上のすみです。', recap:'<code>class="block"</code>　箱に「足場」という名前をつける' },
+ { title:'横の場所を決めよう', word:'style と left', tab:'html',
+   exp:'<code>style</code> には、その部品だけの見た目を書きます。<code>left: 300px;</code> は<b>「左から300ピクセル」</b>という意味です。px（ピクセル）は画面の長さの単位です。',
+   task:'<code>class="block"</code> のあとに、書き足そう。', code:'&lt;div class="block" <mark>style="left: 300px;"</mark>&gt;&lt;/div&gt;',
+   ok:'足場が右に動いた。left の数字が大きいほど、右に行きます。', recap:'<code>left: 300px;</code>　左から300px' },
+ { title:'高さを決めよう', word:'bottom', tab:'html',
+   exp:'<code>bottom: 90px;</code> は<b>「下から90ピクセル」</b>という意味です。<code>left</code> のうしろに、続けて書きます。',
+   task:'<code>left: 300px;</code> のあとに、書き足そう。', code:'&lt;div class="block" style="left: 300px; <mark>bottom: 90px;</mark>"&gt;&lt;/div&gt;',
+   ok:'足場が、段差の手前におりてきた。これで1行の完成です。', recap:'<code>bottom: 90px;</code>　下から90px' },
+ { title:'もう1つ、自分で置こう', word:'おさらい', tab:'html',
+   exp:'画面に点線のわくが出ました。場所は<b>左から140px、下から220px</b>です。',
+   task:'次の行に、足場をもう1つ入力して、わくに重ねよう。見本はありません。上の行を見ながら書こう。', code:'',
+   hint:'<code>&lt;div class="block" style="left: 140px; bottom: 220px;"&gt;&lt;/div&gt;</code>',
+   ok:'わくにぴったり重なった。ここまでが HTML の仕事、「何を、どこに置くか」です。', recap:'HTML　何を、どこに置くか' },
+ { title:'足場の色を変えよう', word:'CSS', tab:'css',
+   exp:'CSSは<b>「見た目」</b>を決めます。<code>.block { }</code> は「block という名前の部品すべて」という意味。<code>background-color</code> は色です。',
+   task:'CSSタブを開き、<code>.block</code> の <code>background-color</code> の <code>#c9853f</code> を消して、好きな色を入力しよう。<code>hotpink</code>、<code>skyblue</code>、<code>gold</code> などの色の名前が使えます。', code:'',
+   ok:'2つの足場が、いっしょに変わった。同じ class の部品は、1か所で全部変えられます。', recap:'<code>.block { background-color: 色; }</code>　block 全部の色' },
+ { title:'さんちゃんを自分の色にしよう', word:'#player', tab:'css',
+   exp:'<code>#player</code> は、さんちゃんのことです。<code>#</code> は「1つだけの部品」につける名前を表します。',
+   task:'<code>#player</code> の <code>background-color</code> を、好きな色に書きかえよう。', code:'',
+   ok:'さんちゃんが、きみだけの色になった。', recap:'<code>#player</code>　さんちゃん（1つだけの部品）' }
+];
 
 const STAGES = [
 { name:'チュートリアル', W:1280, dark:false, tab:'html',
@@ -384,7 +417,7 @@ const STAGES = [
 <!-- 宝石（ふれるとゲット！） -->
 <div class="gem" style="left: 860px; bottom: 340px;"></div>
 
-<!-- ↓ ここに足場のコードを貼り付けよう -->
+<!-- ↓ ここに足場のコードを書こう -->
 
 `,
   css: PLAYER_CSS + BLOCK_CSS,
@@ -625,7 +658,7 @@ ${snip('<div class="door open" style="left: 700px; bottom: 60px;"></div>')}</det
 ];
 
 /* ---------- 保存 ---------- */
-const KEY = 'code-de-susume-v7';
+const KEY = 'code-de-susume-v8';
 let save = { codes:{}, best:{}, gems:{}, cur:0 };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.codes) save = Object.assign(save, s); } catch(e) {}
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch(e) {} };
@@ -690,6 +723,7 @@ function syncScroll(){ hl.scrollTop=ta.scrollTop; hl.scrollLeft=ta.scrollLeft; }
 ta.addEventListener('scroll',syncScroll);
 let saveTimer;
 ta.addEventListener('input',()=>{ code[tab]=ta.value; renderHL(); clearTimeout(saveTimer); saveTimer=setTimeout(()=>{save.codes[cur]={...code};persist();},400); });
+ta.addEventListener('paste',e=>{ if(building()){ e.preventDefault(); toast('じゅんび編では、キーボードで入力しよう',3000); } });
 ta.addEventListener('keydown',e=>{
   if(e.key==='Tab'&&!e.shiftKey){ e.preventDefault(); const s=ta.selectionStart,en=ta.selectionEnd; ta.setRangeText('  ',s,en,'end'); ta.dispatchEvent(new Event('input')); }
   if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); apply(true); }
@@ -713,6 +747,35 @@ new ResizeObserver(fit).observe(vp);
 /* ---------- ステージ構築 ---------- */
 let st, lockedRects=[], els={solid:[],trap:[],gem:[],warp:[]};
 const TARGET={left:140,bottom:220};
+const prepStep=()=>Math.min(Math.max(+save.prepStep||0,0),PREP_STEPS.length-1);
+function renderPrep(ok){
+  const n=prepStep(), s=PREP_STEPS[n], last=n===PREP_STEPS.length-1;
+  const dots=PREP_STEPS.map((_,k)=>`<i class="${k<n||(k===n&&ok)?'done':k===n?'on':''}"></i>`).join('');
+  const recap=PREP_STEPS.slice(0,n+(ok?1:0)).map(x=>`<li>${x.recap}</li>`).join('');
+  $('mission').innerHTML=`<div class="prep-head"><h2>じゅんび編　${s.title}</h2><span>ステップ ${n+1} / ${PREP_STEPS.length}</span><div class="prep-dots" aria-hidden="true">${dots}</div></div>
+<span class="prep-word">${s.word}</span>
+<p class="prep-exp">${s.exp}</p>
+<p class="prep-task">${s.task}</p>
+${s.code?`<div class="type-me">${s.code}<small>黄色いところが、今回書くところ。キーボードで入力しよう。</small></div>`:''}
+${s.hint?`<details><summary>どうしても分からないとき</summary><div class="type-me">${s.hint}</div></details>`:''}
+${ok?(last?`<div class="js-on"><p><b>じゅんび完了！</b> ${s.ok}<br>HTMLで部品を置き、CSSで見た目を決めました。足りないのは「動き」だけ。</p><button class="btn main-btn" id="jsOnBtn" type="button">JavaScript をオン</button></div>`
+  :`<div class="prep-ok"><p><b>できた！</b>　${s.ok}</p><button class="btn main-btn" id="prepNext" type="button">つぎへ ▶</button></div>`):''}
+${recap?`<ul class="prep-recap">${recap}</ul>`:''}
+<p class="memo"><button class="btn" id="prepSkip" type="button" style="font-size:12px;padding:2px 10px">じゅんび編をとばす</button></p>`;
+}
+function prepCheck(){
+  const blocks=els.solid.filter(e=>e.classList.contains('block'));
+  const at=(e,l,b,tol)=>Math.abs(e.offsetLeft-l)<=tol&&Math.abs((H-e.offsetTop-e.offsetHeight)-b)<=tol;
+  return [
+    ()=>!!layer.querySelector('div'),
+    ()=>blocks.length>0,
+    ()=>blocks.some(e=>Math.abs(e.offsetLeft-300)<=12),
+    ()=>blocks.some(e=>at(e,300,90,12)),
+    ()=>blocks.length>=2&&blocks.some(e=>at(e,TARGET.left,TARGET.bottom,24)),
+    ()=>blocks.some(e=>getComputedStyle(e).backgroundColor!=='rgb(201, 133, 63)'),
+    ()=>getComputedStyle(player).backgroundColor!==DEF.color
+  ][prepStep()]();
+}
 const building=()=>cur===0&&!save.prep;
 function buildSys(){
   st=STAGES[cur];
@@ -725,12 +788,15 @@ function buildSys(){
   (st.decor||[]).forEach(([x,b,w,h])=>add('sys-night',{left:x+'px',bottom:b+'px',width:w+'px',height:h+'px'}));
   lockedRects=st.solids.map(([x,b,w,h,t])=>{ add(t==='w'?'sys-wall':'sys-ground',{left:x+'px',bottom:b+'px',width:w+'px',height:h+'px'}); return {x,y:H-b-h,w,h}; });
   add('sys-flag',{left:st.goal+'px',bottom:'60px'});
-  st.signs.forEach(([x,b,t])=>add('sys-sign',{left:x+'px',bottom:b+'px'},t));
+  st.signs.forEach(([x,b,t],k)=>{ if(!(building()&&k>0)) add('sys-sign',{left:x+'px',bottom:b+'px'},t); });
   updFly();
-  $('mission').innerHTML=(building()?PREP_MISSION:st.mission)+GLOSS;
-  if(building()) add('sys-target',{left:TARGET.left+'px',bottom:TARGET.bottom+'px'});
+  world.classList.toggle('prep',building());
+  if(building()){ renderPrep(false); }
+  else $('mission').innerHTML=st.mission+GLOSS;
+  if(building()&&prepStep()>=4) add('sys-target',{left:TARGET.left+'px',bottom:TARGET.bottom+'px'});
   const jsTab=document.querySelector('.tab[data-tab="js"]'); jsTab.hidden=building();
-  if(building()&&tab==='js') setTab('html');
+  document.querySelector('.tab[data-tab="css"]').hidden=building()&&prepStep()<5;
+  if(building()&&(tab==='js'||(tab==='css'&&prepStep()<5))) setTab('html');
   $('pad').hidden=building();
   $('applyBtn').textContent=building()?'▶ 反映する':'▶ 反映して遊ぶ';
 }
@@ -873,7 +939,9 @@ let fly=false;
 const EX=6;
 const allClear=()=>[0,1,2,3,4,5].every(i=>save.best[i]!=null);
 function updFly(){ $('hudStage').textContent=(cur===EX?`EX　${st.name}`:building()?'じゅんび編　ステージをつくろう':`ステージ${cur}　${st.name}`)+(fly?'　[そらとびモード]':''); }
+let lastApplyByButton=false;
 function apply(fromButton){
+  lastApplyByButton=!!fromButton;
   code[tab]=ta.value;
   save.codes[cur]={...code}; save.cur=cur; persist();
   userStyle.textContent = SCOPE_OK ? `@scope (#world) {\n${code.css}\n}` : code.css;
@@ -889,7 +957,8 @@ function apply(fromButton){
   const warns=lint();
   if(fromButton){ vp.focus({preventScroll:true});
     if(warns) toast('コードに気になるところがあります。エディタの下を見てみよう',4000);
-    else if(toastEl.hidden) toast(building()?'反映しました！':'反映しました！ 矢印キーで動かそう'); }
+    else if(building()) toast(document.querySelector('#prepNext,#jsOnBtn')?'できた！ 下の説明を読んで、次に進もう':'反映しました。見本と1文字ずつ見くらべてみよう',3500);
+    else if(toastEl.hidden) toast('反映しました！ 矢印キーで動かそう'); }
 }
 function respawn(full){
   p.x=40; p.y=H-60-p.h; p.vx=0; p.vy=0; p.ground=true; p.coyote=0;
@@ -901,14 +970,10 @@ function respawn(full){
 function checkTutorial(){
   if(cur!==0) return;
   if(building()){
-    const blocks=els.solid.filter(e=>e.classList.contains('block'));
-    const done={P1:blocks.length>0,
-      P2:blocks.some(e=>Math.abs(e.offsetLeft-TARGET.left)<=24&&Math.abs((H-e.offsetTop-e.offsetHeight)-TARGET.bottom)<=24),
-      P3:blocks.some(e=>getComputedStyle(e).backgroundColor!=='rgb(201, 133, 63)'),
-      P4:getComputedStyle(player).backgroundColor!==DEF.color};
-    document.querySelectorAll('#mission [data-check]').forEach(li=>li.classList.toggle('done',!!done[li.dataset.check]));
-    const all=done.P1&&done.P2&&done.P3&&done.P4, box=$('jsOn');
-    if(box){ if(all&&box.hidden) toast('じゅんび完了！ ミッションの下の「JavaScript をオン」をおそう',5000); box.hidden=!all; }
+    let ok=prepCheck(); try{ ok=ok&&lintHTML(code.html).length===0&&lintCSS(code.css).length===0; }catch(e){}
+    const was=!!document.querySelector('#prepNext,#jsOnBtn');
+    renderPrep(ok);
+    if(ok&&!was){ const b=document.querySelector('#prepNext,#jsOnBtn'); if(b&&lastApplyByButton) b.focus({preventScroll:true}); }
     return;
   }
   const done={A:els.solid.some(e=>e.classList.contains('block')), B:prm.jump>=14, C:getComputedStyle(player).backgroundColor!==DEF.color};
@@ -1061,8 +1126,8 @@ function loadStage(i){
   if(cur!==i){ code[tab]=ta.value; save.codes[cur]={...code}; }
   cur=i; save.cur=i;
   const s=STAGES[i], c=save.codes[i];
-  code={ html:c?c.html:s.html, css:c?c.css:s.css, js:c&&c.js!=null?c.js:PLAYER_JS };
-  tab=s.tab; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  code={ html:c?c.html:(i===0&&!save.prep?PREP_HTML:s.html), css:c?c.css:s.css, js:c&&c.js!=null?c.js:PLAYER_JS };
+  tab=(i===0&&!save.prep)?PREP_STEPS[prepStep()].tab:s.tab; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
   ta.value=code[tab]; ta.scrollTop=0; renderHL();
   buildSys(); renderStages(); resetHelp(); apply(false); updHint();
 }
@@ -1073,17 +1138,27 @@ $('resetBtn').addEventListener('click',()=>{
   const b=$('resetBtn');
   if(Date.now()-resetArm>3000){ resetArm=Date.now(); b.textContent='もう一度おすと最初にもどります'; setTimeout(()=>{b.textContent='このステージを最初にもどす';},3000); return; }
   resetArm=0; b.textContent='このステージを最初にもどす';
-  const s=STAGES[cur]; code={html:s.html,css:s.css,js:PLAYER_JS}; ta.value=code[tab]; renderHL(); apply(false); toast('ステージのコードを最初にもどしました');
+  const s=STAGES[cur]; code={html:building()?PREP_HTML:s.html,css:s.css,js:PLAYER_JS}; if(building()){ save.prepStep=0; persist(); buildSys(); if(tab!=='html') setTab('html'); } ta.value=code[tab]; renderHL(); apply(false); toast('ステージのコードを最初にもどしました');
 });
 $('applyBtn').addEventListener('click',()=>apply(true));
 
 /* ---------- じゅんび編から本編へ ---------- */
 function startPlay(skipped){
+  code[tab]=ta.value;
+  if(!/class\s*=\s*"gem"/.test(code.html)) code.html=code.html.replace(/\s*$/,'\n')+TUT_EXTRA;
+  save.codes[0]={...code};
   save.prep=true; persist(); inp.jumpBuf=0;
+  tab='html'; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab==='html')); ta.value=code.html; renderHL();
   buildSys(); apply(false); updHint(); vp.focus({preventScroll:true});
   toast(skipped?'じゅんび編をとばしました。矢印キーで動かそう':'JavaScript オン！ さんちゃんが動き出した。矢印キーで動かそう',5000);
 }
 $('mission').addEventListener('click',e=>{
+  if(e.target.closest('#prepNext')){
+    save.prepStep=prepStep()+1; persist();
+    const want=PREP_STEPS[prepStep()].tab;
+    buildSys(); if(tab!==want) setTab(want);
+    apply(false); ta.focus({preventScroll:true}); return;
+  }
   if(e.target.closest('#jsOnBtn')) startPlay(false);
   else if(e.target.closest('#prepSkip')) startPlay(true);
 });
