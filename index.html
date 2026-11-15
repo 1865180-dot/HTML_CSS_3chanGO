@@ -493,9 +493,9 @@ ${snip('<div class="block" style="left: 588px; bottom: 60px;"></div>')}
 { name:'カギのかかった扉', W:1400, dark:false, tab:'html',
   solids:[[0,0,1400,60,'g'],[700,300,40,600,'w']],
   goal:1320,
-  signs:[[480,170,'扉にカギが\nかかっている…']],
+  signs:[[480,170,'この扉、\nあかない…']],
   html:`<!-- ===== ステージ3：カギのかかった扉 ===== -->
-<!-- ひみつのメモ：扉をひらくじゅもんは「open」 -->
+<!-- ひみつのメモ：この扉にカギはない。でも、コードに書かれていないものは、ゲームにも出てこない。 -->
 
 <div class="door" style="left: 700px; bottom: 60px;"></div>
 
@@ -504,11 +504,11 @@ ${snip('<div class="block" style="left: 588px; bottom: 60px;"></div>')}
 `,
   css: PLAYER_CSS,
   mission:`<h2>ステージ3　カギのかかった扉</h2>
-<p class="lead">扉は上の壁までつながっていて、とびこえられません。コードのどこかに、扉をひらくヒントがあります。</p>
-<ol><li><strong>コメントを読んで扉をひらく</strong>
-<details><summary>ヒント1</summary>HTMLの1行目あたりの「ひみつのメモ」を読もう。</details>
-<details><summary>ヒント2</summary><code>class</code> には名前を2つ以上書けます。スペースで区切ります。
-${snip('<div class="door open" style="left: 700px; bottom: 60px;"></div>')}</details></li></ol>
+<p class="lead">扉は上の壁までつながっていて、とびこえられません。カギもありません。コードのどこかに、先へ進むヒントがあります。</p>
+<ol><li><strong>コメントを読んで、扉をなんとかする</strong>
+<details><summary>ヒント1</summary>HTMLの2行目の「ひみつのメモ」を読もう。扉は、HTMLのどの行でつくられている？</details>
+<details><summary>ヒント2</summary>扉をつくっている行（<code>&lt;div class="door" …&gt;&lt;/div&gt;</code>）を、まるごと消して反映しよう。HTMLに書かれていない部品は、ゲームから消えます。</details>
+<details><summary>別の方法</summary>消すかわりに、その行を <code>&lt;!--</code> と <code>--&gt;</code> で囲んでコメントにしても、同じように消えます。</details></li></ol>
 <p class="gemline">◆ 宝石：<code>class</code> の名前が1文字まちがっているせいで表示されていません。正しい名前は、ほかのステージのコードと見くらべよう。</p>` },
 
 { name:'まっくらエリア', W:1600, dark:true, tab:'css',
@@ -616,12 +616,17 @@ ${snip('<div class="door open" style="left: 700px; bottom: 60px;"></div>')}</det
   html:`<!-- ===== EX：激ムズコース ===== -->
 <!-- ここから先、ヒントはない。 -->
 
-<div class="blok" style="left: 420px; bottom: 60px;"></div>
-<div class="blok" style="left: 504px; bottom: 60px;"></div>
+\x3cscript>
+// くり返しで足場をつくるプログラム
+// addBlock(左からの距離, 下からの高さ)
+for (let i = 0; i < 2; i++) {
+  addBlock(420 + i * 84, 60);
+}
+\x3c/script>
 
 <!--
-<div class="block" style="left: 780px; bottom: 60px;"></div>
-<div class="block" style="left: 860px; bottom: 60px;"></div>
+<div class="blok" style="left: 780px; bottom: 60px;"></div>
+<div class="blok" style="left: 860px; bottom: 60px;"></div>
 <div class="block" style="left: 940px; bottom: 60px;"></div>
 <div class="block" style="left: 1020px; bottom: 60px;"></div>
 -->
@@ -654,11 +659,12 @@ ${snip('<div class="door open" style="left: 700px; bottom: 60px;"></div>')}</det
 }
 `,
   mission:`<h2>EX　激ムズコース</h2>
-<p class="lead">全ステージをクリアした人だけのおまけコース。谷、壁、扉、暗闇、トゲ。これまでに使った技を全部使って、ゴールをめざそう。ヒントはありません。</p>` }
+<p class="lead">全ステージをクリアした人だけのおまけコース。谷、壁、扉、暗闇、トゲ。これまでに使った技を全部使って、ゴールをめざそう。ヒントはありません。</p>
+<p class="memo">このコースだけ、HTMLの <code>&lt;script&gt;</code> の中に書いたプログラムが動きます。</p>` }
 ];
 
 /* ---------- 保存 ---------- */
-const KEY = 'code-de-susume-v8';
+const KEY = 'code-de-susume-v9';
 let save = { codes:{}, best:{}, gems:{}, cur:0 };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.codes) save = Object.assign(save, s); } catch(e) {}
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch(e) {} };
@@ -677,9 +683,10 @@ let code = { html:'', css:'', js:'' };
 
 /* ---------- ハイライト ---------- */
 function hlHTML(src){
-  let out='', last=0, m; const re=/<!--[\s\S]*?(?:-->|$)|<\/?[A-Za-z][^<>]*>?/g;
+  let out='', last=0, m; const re=/<!--[\s\S]*?(?:-->|$)|\x3cscript\b[^>]*>[\s\S]*?(?:\x3c\/script\s*>|$)|<\/?[A-Za-z][^<>]*>?/gi;
   while((m=re.exec(src))){
     if(!m[0].length){re.lastIndex++;continue;}
+    if(/^\x3cscript/i.test(m[0])){ const p=m[0].match(/^(\x3cscript\b[^>]*>)([\s\S]*?)(\x3c\/script\s*>)?$/i); out+=esc(src.slice(last,m.index))+`<span class="t-tag">${esc(p[1])}</span>`+hlJS(p[2])+(p[3]?`<span class="t-tag">${esc(p[3])}</span>`:''); last=m.index+m[0].length; continue; }
     out+=esc(src.slice(last,m.index));
     const t=m[0];
     if(t.startsWith('<!--')) out+=`<span class="t-com">${esc(t)}</span>`;
@@ -811,10 +818,17 @@ function jsRaw(name){
   const m=body.match(new RegExp('(?:const|let|var)\\s+'+name+'\\s*=\\s*([^;\\n]*)'));
   return m?m[1].trim():null;
 }
+function calc(src){            // 数字と + - * / ( ) だけの式を計算する（evalは使わない）
+  const tk=src.match(/\d+(?:\.\d+)?|[-+*/()]/g)||[]; let k=0;
+  const prim=()=>{ const x=tk[k++]; if(x==='('){ const v=sum(); if(tk[k++]!==')') throw 0; return v; } if(x==='-') return -prim(); if(x==='+') return prim(); if(x==null||!/^\d/.test(x)) throw 0; return parseFloat(x); };
+  const prod=()=>{ let v=prim(); while(tk[k]==='*'||tk[k]==='/'){ const o=tk[k++], r=prim(); v=o==='*'?v*r:v/r; } return v; };
+  const sum=()=>{ let v=prod(); while(tk[k]==='+'||tk[k]==='-'){ const o=tk[k++], r=prod(); v=o==='+'?v+r:v-r; } return v; };
+  const v=sum(); if(k!==tk.length) throw 0; return v;
+}
 function jsVal(name){
   const raw=jsRaw(name);
   if(raw==null||!/^[\d\s+\-*/().]+$/.test(raw)) return null;
-  try{ const v=Function('"use strict";return ('+raw+')')(); return typeof v==='number'&&isFinite(v)?v:null; }catch(e){ return null; }
+  try{ const v=calc(raw); return typeof v==='number'&&isFinite(v)?v:null; }catch(e){ return null; }
 }
 function readPlayer(report){
   player.style.width=''; player.style.height='';
@@ -857,7 +871,8 @@ const PUZZLE_CLASS={3:['gme'],6:['blok']};
 function lintHTML(src){
   const w=[];
   if((src.match(/<!--/g)||[]).length>(src.match(/-->/g)||[]).length) w.push('コメントの <code>&lt;!--</code> が <code>--&gt;</code> で閉じられていません。そこから下が全部コメントになって、ゲームに出てきません。');
-  const body=src.replace(/<!--[\s\S]*?(-->|$)/g,'');
+  if((src.match(/\x3cscript\b/gi)||[]).length>(src.match(/\x3c\/script\s*>/gi)||[]).length) w.push('<code>&lt;script&gt;</code> が <code>&lt;/script&gt;</code> で閉じられていません。');
+  const body=src.replace(/<!--[\s\S]*?(-->|$)/g,'').replace(/\x3cscript\b[\s\S]*?(\x3c\/script\s*>|$)/gi,'');
   const open=body.match(/<\/?[A-Za-z][^<>]*(?=<)|<\/?[A-Za-z][^<>]*$/);
   if(open) w.push(`タグの終わりの <code>&gt;</code> が足りません：<code>${esc(open[0].trim().slice(0,40))}</code>`);
   let quoteBad=false;
@@ -910,6 +925,7 @@ function lintJS(){
 function lint(){
   const box=$('lint'); let w=[];
   try{ w=[...lintHTML(code.html).map(m=>['HTML',m]),...lintCSS(code.css).map(m=>['CSS',m]),...lintJS().map(m=>['JavaScript',m])]; }catch(e){ w=[]; }
+  if(progMsg) w.push(['プログラム','<code>&lt;script&gt;</code> の中でエラー：'+esc(progMsg)]);
   if(!w.length){ box.hidden=true; box.innerHTML=''; return 0; }
   box.innerHTML=`<h3>コードチェック：気になるところがあります</h3><ul>${w.slice(0,4).map(([k,m])=>`<li><b>${k}</b>　${m}</li>`).join('')}</ul>${w.length>4?`<p>ほかに ${w.length-4}件あります。上から順に直してみよう。</p>`:''}<p>直したら、もう一度「反映して遊ぶ」をおそう。</p>`;
   box.hidden=false; return w.length;
@@ -933,6 +949,49 @@ function hideSameColor(){
   }
 }
 
+/* ---------- 激ムズコース：HTMLの \x3cscript> に書いたプログラムで足場をふやす ---------- */
+let progRun=0, progMsg='';
+function refreshEls(){
+  els.solid=[...layer.querySelectorAll('.block,.door,.wall,.ground')];
+  els.trap=[...layer.querySelectorAll('.trap')];
+  els.gem=[...layer.querySelectorAll('.gem')];
+  els.warp=[...layer.querySelectorAll('.warp')];
+  hideSameColor();
+}
+function runProgram(){
+  const my=++progRun; progMsg='';
+  if(cur!==EX) return;
+  const body=code.html.replace(/<!--[\s\S]*?(-->|$)/g,'');
+  const src=[...body.matchAll(/\x3cscript\b[^>]*>([\s\S]*?)\x3c\/script\s*>/gi)].map(m=>m[1]).join('\n;\n');
+  if(!src.trim()) return;
+  const pre='const __out=[];let __n=0;function addBlock(left,bottom,width){if(++__n>300)throw new Error("足場は300個までです");__out.push([Number(left),Number(bottom),width==null?null:Number(width)]);}\nself.onerror=function(m){postMessage({ok:false,msg:String(m),out:__out});return true;};\ntry{\n';
+  const post='\n;postMessage({ok:true,out:__out});}catch(e){postMessage({ok:false,msg:String(e&&e.message||e),out:__out});}';
+  let w,url,timer;
+  const finish=(d)=>{
+    clearTimeout(timer); try{ w&&w.terminate(); }catch(e){} try{ URL.revokeObjectURL(url); }catch(e){}
+    if(my!==progRun) return;
+    for(const [l,b,wd] of (d.out||[])){
+      if(!isFinite(l)||!isFinite(b)) continue;
+      const el=document.createElement('div'); el.className='block'; el.dataset.gen='1';
+      el.style.left=l+'px'; el.style.bottom=b+'px'; if(wd!=null&&isFinite(wd)) el.style.width=wd+'px';
+      layer.appendChild(el);
+    }
+    refreshEls();
+    if(!d.ok){
+      const m=String(d.msg||''), nd=m.match(/([\w$]+) is not defined/);
+      progMsg=/SyntaxError|Unexpected|Missing|Invalid/.test(m)?'書き方にまちがいがあります。かっこ ( ) { } の数や、; の位置を確認しよう。'
+        :nd?`「${nd[1]}」という名前が見つかりません。つづりを確認しよう。`:(m||'エラー');
+      lint(); toast('プログラムにエラーがあります。エディタの下を見てみよう',4000); }
+  };
+  try{
+    url=URL.createObjectURL(new Blob([pre+src+post],{type:'text/javascript'}));
+    w=new Worker(url);
+    w.onmessage=e=>finish(e.data);
+    w.onerror=e=>{ e.preventDefault&&e.preventDefault(); finish({ok:false,msg:(e.message||'書き方にまちがいがあります')+(e.lineno?'':''),out:[]}); };
+    timer=setTimeout(()=>finish({ok:false,msg:'プログラムが終わりません。くり返しが止まらなくなっていないか確認しよう。',out:[]}),1500);
+  }catch(e){ finish({ok:false,msg:'この環境ではプログラムを動かせませんでした。',out:[]}); }
+}
+
 /* ---------- 反映 ---------- */
 let run={frames:0,started:false,done:false,gem:false};
 let fly=false;
@@ -951,6 +1010,7 @@ function apply(fromButton){
   els.gem=[...layer.querySelectorAll('.gem')];
   els.warp=[...layer.querySelectorAll('.warp')];
   hideSameColor();
+  runProgram();
   readPlayer(fromButton);
   respawn(true);
   checkTutorial();
