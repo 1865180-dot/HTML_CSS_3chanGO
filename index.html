@@ -109,7 +109,8 @@ code{font-family:var(--f-mono);font-size:.92em;background:var(--panel2);padding:
 .tabs{display:flex;gap:4px;align-items:flex-end}
 .tab{border:2px solid var(--line);border-bottom:none;background:var(--panel);border-radius:8px 8px 0 0;padding:6px 18px;font:15px/1.2 var(--f-display);color:var(--muted)}
 .tab.on{background:#0b1029;color:var(--coin)}
-.tabs .note{margin-left:auto;font-size:12px;color:var(--muted);padding-bottom:4px}
+.tabs .note{margin-left:auto;font-size:12px;color:var(--muted);padding-bottom:4px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tab{white-space:nowrap;flex-shrink:0}
 .code{position:relative;height:clamp(360px,64vh,680px);background:#0b1029;border:2px solid var(--line);border-radius:0 8px 8px 8px;overflow:hidden;margin-top:-10px}
 .code pre,.code textarea{position:absolute;inset:0;margin:0;padding:14px;font:14px/1.65 var(--f-mono);tab-size:2;white-space:pre;overflow-wrap:normal;letter-spacing:0;border:0}
 .code pre{overflow:hidden;color:#d9e1ff;pointer-events:none}
@@ -246,6 +247,7 @@ code{font-family:var(--f-mono);font-size:.92em;background:var(--panel2);padding:
     <div class="tabs">
       <button class="tab on" data-tab="html">HTML</button>
       <button class="tab" data-tab="css">CSS</button>
+      <button class="tab" data-tab="js">JavaScript</button>
       <span class="note">緑の文字は「コメント」。ヒントがかくれているかも</span>
     </div>
     <div class="code">
@@ -305,12 +307,14 @@ const LIM = { jump: [5, 16], speed: [1, 6], size: [12, 64] };
 
 const PLAYER_CSS = `/* 主人公「さんちゃん」 */
 #player {
-  --jump-power: 10;  /* ジャンプ力（5〜16） */
-  --speed: 4;        /* はやさ（1〜6） */
   width: 28px;
   height: 44px;
   background-color: #f8df82;
 }
+`;
+const PLAYER_JS = `// さんちゃんの動き
+const jumpPower = 10;  // ジャンプ力（5〜16）
+const speed = 4;       // はやさ（1〜6）
 `;
 const BLOCK_CSS = `
 /* 足場 */
@@ -324,14 +328,15 @@ const BLOCK_CSS = `
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const snip = c => `<div class="snip"><code>${esc(c)}</code><button class="btn copy" type="button">コピー</button></div>`;
 
-const GLOSS = `<details class="memo-box"><summary>ことばメモ（class・タグ・CSSの読み方）</summary>
+const GLOSS = `<details class="memo-box"><summary>ことばメモ（class・タグ・CSS・JavaScript）</summary>
 <dl>
 <dt>タグ</dt><dd><code>&lt;div&gt;</code> から <code>&lt;/div&gt;</code> までが、1つの部品です。</dd>
 <dt>class</dt><dd>部品につける「種類の名前」。HTMLでは <code>class="block"</code>、CSSでは <code>.block</code> と書きます。名前が1文字でもちがうと、別の種類としてあつかわれます。スペースで区切ると、1つの部品に名前を2つ以上つけられます（例 <code>class="block big"</code>）。</dd>
 <dt>id</dt><dd><code>#player</code> のように <code>#</code> がつくのは、1つだけの部品につける名前です。</dd>
 <dt>style</dt><dd>その部品だけに直接書くCSS。このゲームでは、場所（<code>left</code>＝左から、<code>bottom</code>＝下から）を決めるのに使っています。</dd>
 <dt>CSSの形</dt><dd><code>.block { width: 64px; }</code> は「だれの（<code>.block</code>）」「何を（<code>width</code>）」「どうする（<code>64px</code>）」の順です。1行の終わりには <code>;</code> をつけます。</dd>
-<dt>コメント</dt><dd>HTMLは <code>&lt;!-- --&gt;</code>、CSSは <code>/* */</code> の中がコメント。ゲームには出てこない、人が読むためのメモです。</dd>
+<dt>JavaScript</dt><dd>Webページに「動き」をつけるプログラムの言葉です。このゲームでは、さんちゃんのジャンプ力（<code>jumpPower</code>）とはやさ（<code>speed</code>）を決めています。<code>const 名前 = 値;</code> は「この名前に、この値を入れる」という意味です。</dd>
+<dt>コメント</dt><dd>HTMLは <code>&lt;!-- --&gt;</code>、CSSは <code>/* */</code>、JavaScriptは <code>//</code> のあとがコメント。ゲームには出てこない、人が読むためのメモです。</dd>
 </dl></details>`;
 
 const STAGES = [
@@ -356,7 +361,7 @@ const STAGES = [
 <li data-check="A"><strong>足場を置こう（HTML）</strong><br>下のコードをコピーして、HTMLの「ここに足場のコードを貼り付けよう」の下に貼り付け、<b>反映して遊ぶ</b>をおそう。
 ${snip('<div class="block" style="left: 300px; bottom: 90px;"></div>')}
 <span class="memo"><code>left</code> は左からの距離、<code>bottom</code> は下からの高さです（単位 px）。</span></li>
-<li data-check="B"><strong>ジャンプ力を上げよう（CSS）</strong><br>CSSタブを開き、<code>--jump-power: 10;</code> の数字を <code>15</code> に変えて反映。高い壁をこえられます。</li>
+<li data-check="B"><strong>ジャンプ力を上げよう（JavaScript）</strong><br>JavaScriptタブを開き、<code>const jumpPower = 10;</code> の数字を <code>15</code> に変えて反映。高い壁をこえられます。</li>
 <li data-check="C"><strong>さんちゃんを自分の色にしよう（CSS）</strong><br><code>#player</code> の <code>background-color</code> を好きな色に。<code>#3fa7ff</code> や <code>hotpink</code> のように書くと、体の色が変わります。</li>
 </ol>
 <div class="explain">
@@ -369,7 +374,7 @@ ${snip('<div class="block" style="left: 300px; bottom: 90px;"></div>')}
 <p>同じ class の部品は、CSSを1か所変えるだけで全部いっしょに変わります。このゲームでは、class の名前で部品の役割も決まります。</p>
 <ul class="names"><li><code>block</code> 足場</li><li><code>gem</code> 宝石</li><li><code>door</code> 扉</li><li>ほかの名前は、先のステージで登場します</li></ul>
 </div>
-<p class="memo">HTML＝ゲームに「何があるか」、CSS＝それが「どんな見た目・性質か」。この2つを使い分けて進もう。</p>` },
+<p class="memo">HTML＝ゲームに「何があるか」、CSS＝それが「どんな見た目か」、JavaScript＝「どう動くか」。この3つの役割を使い分けて進もう。</p>` },
 
 { name:'谷をこえろ', W:1400, dark:false, tab:'html',
   solids:[[0,0,400,60,'g'],[760,0,640,60,'g'],[380,200,400,1200,'w']],
@@ -593,7 +598,7 @@ ${snip('<div class="door open" style="left: 700px; bottom: 60px;"></div>')}</det
 ];
 
 /* ---------- 保存 ---------- */
-const KEY = 'code-de-susume-v5';
+const KEY = 'code-de-susume-v6';
 let save = { codes:{}, best:{}, gems:{}, cur:0 };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.codes) save = Object.assign(save, s); } catch(e) {}
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch(e) {} };
@@ -608,7 +613,7 @@ const SCOPE_OK = typeof CSSScopeRule !== 'undefined';
 let cur = Math.min(Math.max(+save.cur||0,0),STAGES.length-1);
 if(cur===6&&![0,1,2,3,4,5].every(i=>save.best[i]!=null)) cur=0;
 let tab = 'html';
-let code = { html:'', css:'' };
+let code = { html:'', css:'', js:'' };
 
 /* ---------- ハイライト ---------- */
 function hlHTML(src){
@@ -644,7 +649,16 @@ function hlCSS(src){
   }
   return out+seg(src.slice(last));
 }
-function renderHL(){ hl.innerHTML=(tab==='html'?hlHTML(ta.value):hlCSS(ta.value))+'\n'; syncScroll(); }
+function hlJS(src){
+  let out='', last=0, m; const re=/\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$)|\b(?:const|let|var)\b|\b\d+(?:\.\d+)?\b/g;
+  while((m=re.exec(src))){
+    out+=esc(src.slice(last,m.index)); const k=m[0];
+    out+=`<span class="${k[0]==='/'?'t-com':/^\d/.test(k)?'t-val':'t-tag'}">${esc(k)}</span>`;
+    last=m.index+k.length;
+  }
+  return out+esc(src.slice(last));
+}
+function renderHL(){ hl.innerHTML=(tab==='html'?hlHTML(ta.value):tab==='css'?hlCSS(ta.value):hlJS(ta.value))+'\n'; syncScroll(); }
 function syncScroll(){ hl.scrollTop=ta.scrollTop; hl.scrollLeft=ta.scrollLeft; }
 ta.addEventListener('scroll',syncScroll);
 let saveTimer;
@@ -691,11 +705,22 @@ function buildSys(){
 const p={x:40,y:0,w:28,h:44,vx:0,vy:0,ground:false,coyote:0,face:1};
 let prm={jump:DEF.jump,speed:DEF.speed};
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+/* JavaScriptタブから数値の設定を読み取る（数字と + - * / ( ) の計算だけを受けつける） */
+function jsRaw(name){
+  const body=code.js.replace(/\/\/[^\n]*|\/\*[\s\S]*?(\*\/|$)/g,'');
+  const m=body.match(new RegExp('(?:const|let|var)\\s+'+name+'\\s*=\\s*([^;\\n]*)'));
+  return m?m[1].trim():null;
+}
+function jsVal(name){
+  const raw=jsRaw(name);
+  if(raw==null||!/^[\d\s+\-*/().]+$/.test(raw)) return null;
+  try{ const v=Function('"use strict";return ('+raw+')')(); return typeof v==='number'&&isFinite(v)?v:null; }catch(e){ return null; }
+}
 function readPlayer(report){
   player.style.width=''; player.style.height='';
   const cs=getComputedStyle(player);
-  let j=parseFloat(cs.getPropertyValue('--jump-power')), s=parseFloat(cs.getPropertyValue('--speed'));
-  if(!isFinite(j)) j=DEF.jump; if(!isFinite(s)) s=DEF.speed;
+  let j=jsVal('jumpPower'), s=jsVal('speed');
+  if(j==null) j=DEF.jump; if(s==null) s=DEF.speed;
   const msgs=[];
   if(j>LIM.jump[1]) msgs.push(`ジャンプ力は${LIM.jump[1]}までです`);
   if(s>LIM.speed[1]) msgs.push(`はやさは${LIM.speed[1]}までです`);
@@ -757,7 +782,7 @@ function lintDecls(text,w,inline){
     if(i<0){ w.push(`<code>${esc(d.slice(0,40))}</code> には <code>:</code> が必要です（例 <code>left: 300px;</code>）。`); continue; }
     const prop=d.slice(0,i).trim(), val=d.slice(i+1).trim();
     if(/\n/.test(val)&&/:/.test(val)){ w.push(`行の終わりの <code>;</code> がぬけています：<code>${esc(d.split('\n')[0].trim().slice(0,40))}</code>`); continue; }
-    if(prop.startsWith('--')){ if(!/^-?\d+(\.\d+)?$/.test(val)) w.push(`<code>${esc(prop)}</code> は数字だけで書きます（例 <code>${esc(prop)}: 10;</code>）。`); continue; }
+    if(prop.startsWith('--')) continue;
     if(!val){ w.push(`<code>${esc(prop)}:</code> のあとに値がありません。`); continue; }
     if(!CSS.supports(prop,'initial')){ w.push(`<code>${esc(prop)}</code> というプロパティはありません。つづりを確認しよう。`); continue; }
     if(/^(left|right|top|bottom|width|height)$/.test(prop)&&/^-?\d+(\.\d+)?$/.test(val)&&+val!==0){ w.push(`<code>${esc(prop)}: ${esc(val)}</code> の数字のあとに単位 <code>px</code> が必要です（例 <code>${esc(prop)}: ${esc(val)}px</code>）。`); continue; }
@@ -773,9 +798,18 @@ function lintCSS(src){
   for(const m of body.matchAll(/\{([^{}]*)\}/g)) lintDecls(m[1],w,false);
   return w;
 }
+function lintJS(){
+  const w=[];
+  for(const [name,label,ex] of [['jumpPower','ジャンプ力',10],['speed','はやさ',4]]){
+    const raw=jsRaw(name);
+    if(raw==null) w.push(`<code>${name}</code>（${label}）が見つかりません。<code>const ${name} = ${ex};</code> のように書きます。名前のつづりと <code>=</code> を確認しよう。`);
+    else if(jsVal(name)==null) w.push(`<code>${name} = ${esc(raw.slice(0,24))}</code> は数字として読めません。<code>const ${name} = ${ex};</code> のように、数字だけを書きます（単位はつけません）。`);
+  }
+  return w;
+}
 function lint(){
   const box=$('lint'); let w=[];
-  try{ w=[...lintHTML(code.html).map(m=>['HTML',m]),...lintCSS(code.css).map(m=>['CSS',m])]; }catch(e){ w=[]; }
+  try{ w=[...lintHTML(code.html).map(m=>['HTML',m]),...lintCSS(code.css).map(m=>['CSS',m]),...lintJS().map(m=>['JavaScript',m])]; }catch(e){ w=[]; }
   if(!w.length){ box.hidden=true; box.innerHTML=''; return 0; }
   box.innerHTML=`<h3>コードチェック：気になるところがあります</h3><ul>${w.slice(0,4).map(([k,m])=>`<li><b>${k}</b>　${m}</li>`).join('')}</ul>${w.length>4?`<p>ほかに ${w.length-4}件あります。上から順に直してみよう。</p>`:''}<p>直したら、もう一度「反映して遊ぶ」をおそう。</p>`;
   box.hidden=false; return w.length;
@@ -982,7 +1016,7 @@ function loadStage(i){
   if(cur!==i){ code[tab]=ta.value; save.codes[cur]={...code}; }
   cur=i; save.cur=i;
   const s=STAGES[i], c=save.codes[i];
-  code={ html:c?c.html:s.html, css:c?c.css:s.css };
+  code={ html:c?c.html:s.html, css:c?c.css:s.css, js:c&&c.js!=null?c.js:PLAYER_JS };
   tab=s.tab; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
   ta.value=code[tab]; ta.scrollTop=0; renderHL();
   buildSys(); renderStages(); resetHelp(); apply(false); updHint();
@@ -994,7 +1028,7 @@ $('resetBtn').addEventListener('click',()=>{
   const b=$('resetBtn');
   if(Date.now()-resetArm>3000){ resetArm=Date.now(); b.textContent='もう一度おすと最初にもどります'; setTimeout(()=>{b.textContent='このステージを最初にもどす';},3000); return; }
   resetArm=0; b.textContent='このステージを最初にもどす';
-  const s=STAGES[cur]; code={html:s.html,css:s.css}; ta.value=code[tab]; renderHL(); apply(false); toast('ステージのコードを最初にもどしました');
+  const s=STAGES[cur]; code={html:s.html,css:s.css,js:PLAYER_JS}; ta.value=code[tab]; renderHL(); apply(false); toast('ステージのコードを最初にもどしました');
 });
 $('applyBtn').addEventListener('click',()=>apply(true));
 
