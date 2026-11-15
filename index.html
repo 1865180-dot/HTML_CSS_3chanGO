@@ -122,6 +122,11 @@ code{font-family:var(--f-mono);font-size:.92em;background:var(--panel2);padding:
 .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .credit{font-size:12px;color:var(--muted);margin:0}
 .stg.locked{opacity:.55}
+.js-on{margin-top:14px;border:3px solid var(--go);border-radius:10px;padding:12px 16px;text-align:center;background:rgb(62 224 143 / .12)}
+.js-on p{margin:0 0 10px}
+.js-on .btn{font:22px/1.2 var(--f-display);padding:10px 28px;animation:pulse 1s ease-in-out infinite alternate}
+:where(.sys-target){width:64px;height:24px;box-sizing:border-box;border:2px dashed #1a2248;border-radius:3px;background:rgb(255 255 255 / .35)}
+:where(.sys-target)::after{content:"ここに重ねよう";position:absolute;left:50%;top:-22px;transform:translateX(-50%);white-space:nowrap;font:12px/1.3 var(--f-display);color:#1a2248}
 .start{position:fixed;inset:0;z-index:200;background:var(--sky);color:#141a45;overflow:hidden}
 .start-main{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;padding:max(24px,6vh) 16px 0;text-align:center}
 .start-kicker{margin:0;font:clamp(14px,2.2vw,20px)/1.4 var(--f-display);letter-spacing:.12em;background:#141a45;color:#fff;padding:4px 14px;border-radius:6px}
@@ -232,7 +237,7 @@ code{font-family:var(--f-mono);font-size:.92em;background:var(--panel2);padding:
         </div>
       </div>
     </div>
-    <div class="pad">
+    <div class="pad" id="pad">
       <button class="btn" id="padL" aria-label="左へ移動">◀</button>
       <button class="btn" id="padR" aria-label="右へ移動">▶</button>
       <button class="btn" id="padJ">ジャンプ</button>
@@ -339,31 +344,21 @@ const GLOSS = `<details class="memo-box"><summary>ことばメモ（class・タ�
 <dt>コメント</dt><dd>HTMLは <code>&lt;!-- --&gt;</code>、CSSは <code>/* */</code>、JavaScriptは <code>//</code> のあとがコメント。ゲームには出てこない、人が読むためのメモです。</dd>
 </dl></details>`;
 
-const STAGES = [
-{ name:'チュートリアル', W:1280, dark:false, tab:'html',
-  solids:[[0,0,380,60,'g'],[380,0,380,170,'g'],[760,0,240,320,'g'],[1000,0,280,60,'g']],
-  goal:1200,
-  signs:[[150,200,'高くて登れない…\n足場を置こう！（A）'],[520,220,'ジャンプ力を\n上げよう！（B）'],[1040,130,'ゴールは\nすぐそこ！']],
-  html:`<!-- ===== ステージ0：チュートリアル ===== -->
-<!-- 制作者より：コードの中の「コメント」には、
-     ヒントや秘密がかくれていることがあるよ。 -->
-
-<!-- 宝石（ふれるとゲット！） -->
-<div class="gem" style="left: 860px; bottom: 340px;"></div>
-
-<!-- ↓ ミッションA：ここに足場のコードを貼り付けよう -->
-
-`,
-  css: PLAYER_CSS + BLOCK_CSS,
-  mission:`<h2>ステージ0　チュートリアル</h2>
-<p class="lead">主人公は三筑中のキャラクター「さんちゃん」。コードを書きかえると、ゲームの世界が変わります。3つの操作をためそう。</p>
+const PREP_MISSION = `<h2>じゅんび編　ステージをつくろう</h2>
+<p class="lead">主人公は三筑中のキャラクター「さんちゃん」。まずは HTML と CSS だけで、ステージをつくります。さんちゃんはまだ動きません。4つできたら、JavaScript をオンにして動かそう。</p>
 <ol>
-<li data-check="A"><strong>足場を置こう（HTML）</strong><br>下のコードをコピーして、HTMLの「ここに足場のコードを貼り付けよう」の下に貼り付け、<b>反映して遊ぶ</b>をおそう。
+<li data-check="P1"><strong>足場を置こう（HTML）</strong><br>下のコードをコピーして、HTMLの「ここに足場のコードを貼り付けよう」の下に貼り付け、<b>反映する</b>をおそう。
 ${snip('<div class="block" style="left: 300px; bottom: 90px;"></div>')}
 <span class="memo"><code>left</code> は左からの距離、<code>bottom</code> は下からの高さです（単位 px）。</span></li>
-<li data-check="B"><strong>ジャンプ力を上げよう（JavaScript）</strong><br>JavaScriptタブを開き、<code>const jumpPower = 10;</code> の数字を <code>15</code> に変えて反映。高い壁をこえられます。</li>
-<li data-check="C"><strong>さんちゃんを自分の色にしよう（CSS）</strong><br><code>#player</code> の <code>background-color</code> を好きな色に。<code>#3fa7ff</code> や <code>hotpink</code> のように書くと、体の色が変わります。</li>
+<li data-check="P2"><strong>足場をもう1つ置いて、点線のわくに動かそう（HTML）</strong><br>同じ行をもう1つ貼り付け、<code>left</code> と <code>bottom</code> の数字を変えて、画面の点線のわくに重ねよう。
+<details><summary>ヒント</summary>わくは、左から140px、下から220pxのところにあります。<code>left: 140px; bottom: 220px;</code></details></li>
+<li data-check="P3"><strong>足場の色を変えよう（CSS）</strong><br>CSSタブを開き、<code>.block</code> の <code>background-color</code> を好きな色に変えて反映。2つの足場がいっしょに変わることをたしかめよう。<code>#3fa7ff</code> や <code>hotpink</code> のように書きます。</li>
+<li data-check="P4"><strong>さんちゃんを自分の色にしよう（CSS）</strong><br><code>#player</code> の <code>background-color</code> を好きな色に。体の色が変わります。</li>
 </ol>
+<div class="js-on" id="jsOn" hidden>
+<p><b>じゅんび完了！</b> HTMLで部品を置き、CSSで見た目を決めました。足りないのは「動き」だけ。</p>
+<button class="btn main-btn" id="jsOnBtn" type="button">JavaScript をオン</button>
+</div>
 <div class="explain">
 <h3>class（クラス）ってなに？</h3>
 <p><code>class</code> は、部品につける<b>「種類の名前」</b>です。HTMLで名前をつけ、CSSでその名前の部品の見た目を決めます。</p>
@@ -373,6 +368,38 @@ ${snip('<div class="block" style="left: 300px; bottom: 90px;"></div>')}
 </div>
 <p>同じ class の部品は、CSSを1か所変えるだけで全部いっしょに変わります。このゲームでは、class の名前で部品の役割も決まります。</p>
 <ul class="names"><li><code>block</code> 足場</li><li><code>gem</code> 宝石</li><li><code>door</code> 扉</li><li>ほかの名前は、先のステージで登場します</li></ul>
+</div>
+<p class="memo">時間があまったら、足場を増やしたり、色を変えたりして、ステージをかざろう。</p>
+<p class="memo"><button class="btn" id="prepSkip" type="button" style="font-size:12px;padding:2px 10px">じゅんび編をとばす</button></p>`;
+
+const STAGES = [
+{ name:'チュートリアル', W:1280, dark:false, tab:'html',
+  solids:[[0,0,380,60,'g'],[380,0,380,170,'g'],[760,0,240,320,'g'],[1000,0,280,60,'g']],
+  goal:1200,
+  signs:[[205,130,'高くて登れない…\n足場がいるね'],[520,220,'ジャンプ力を\n上げよう！'],[1040,130,'ゴールは\nすぐそこ！']],
+  html:`<!-- ===== ステージ0：チュートリアル ===== -->
+<!-- 制作者より：コードの中の「コメント」には、
+     ヒントや秘密がかくれていることがあるよ。 -->
+
+<!-- 宝石（ふれるとゲット！） -->
+<div class="gem" style="left: 860px; bottom: 340px;"></div>
+
+<!-- ↓ ここに足場のコードを貼り付けよう -->
+
+`,
+  css: PLAYER_CSS + BLOCK_CSS,
+  mission:`<h2>ステージ0　チュートリアル</h2>
+<p class="lead">JavaScriptがオンになって、さんちゃんが動けるようになりました。自分でつくったステージを進んで、ゴールの旗をめざそう。</p>
+<ol>
+<li><strong>足場にのって、段差を登ろう</strong><br>← → で移動、スペースでジャンプ。足場がまだないときは、下のコードをHTMLに貼り付けて反映しよう。
+${snip('<div class="block" style="left: 300px; bottom: 90px;"></div>')}</li>
+<li data-check="B"><strong>ジャンプ力を上げよう（JavaScript）</strong><br>JavaScriptタブを開き、<code>const jumpPower = 10;</code> の数字を <code>15</code> に変えて反映。高い壁をこえられます。</li>
+<li><strong>ゴールの旗まで行こう</strong></li>
+</ol>
+<div class="explain">
+<h3>JavaScript（ジャバスクリプト）ってなに？</h3>
+<p>Webページに<b>「動き」</b>をつけるプログラムの言葉です。HTMLで置いた部品と、CSSで決めた見た目は、JavaScriptがあってはじめて動きます。</p>
+<p>このゲームでは、JavaScriptタブでさんちゃんのジャンプ力（<code>jumpPower</code>）とはやさ（<code>speed</code>）を変えられます。</p>
 </div>
 <p class="memo">HTML＝ゲームに「何があるか」、CSS＝それが「どんな見た目か」、JavaScript＝「どう動くか」。この3つの役割を使い分けて進もう。</p>` },
 
@@ -598,7 +625,7 @@ ${snip('<div class="door open" style="left: 700px; bottom: 60px;"></div>')}</det
 ];
 
 /* ---------- 保存 ---------- */
-const KEY = 'code-de-susume-v6';
+const KEY = 'code-de-susume-v7';
 let save = { codes:{}, best:{}, gems:{}, cur:0 };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.codes) save = Object.assign(save, s); } catch(e) {}
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch(e) {} };
@@ -685,6 +712,8 @@ new ResizeObserver(fit).observe(vp);
 
 /* ---------- ステージ構築 ---------- */
 let st, lockedRects=[], els={solid:[],trap:[],gem:[],warp:[]};
+const TARGET={left:140,bottom:220};
+const building=()=>cur===0&&!save.prep;
 function buildSys(){
   st=STAGES[cur];
   world.style.width=st.W+'px';
@@ -698,7 +727,12 @@ function buildSys(){
   add('sys-flag',{left:st.goal+'px',bottom:'60px'});
   st.signs.forEach(([x,b,t])=>add('sys-sign',{left:x+'px',bottom:b+'px'},t));
   updFly();
-  $('mission').innerHTML=st.mission+GLOSS;
+  $('mission').innerHTML=(building()?PREP_MISSION:st.mission)+GLOSS;
+  if(building()) add('sys-target',{left:TARGET.left+'px',bottom:TARGET.bottom+'px'});
+  const jsTab=document.querySelector('.tab[data-tab="js"]'); jsTab.hidden=building();
+  if(building()&&tab==='js') setTab('html');
+  $('pad').hidden=building();
+  $('applyBtn').textContent=building()?'▶ 反映する':'▶ 反映して遊ぶ';
 }
 
 /* ---------- 主人公 ---------- */
@@ -838,7 +872,7 @@ let run={frames:0,started:false,done:false,gem:false};
 let fly=false;
 const EX=6;
 const allClear=()=>[0,1,2,3,4,5].every(i=>save.best[i]!=null);
-function updFly(){ $('hudStage').textContent=(cur===EX?`EX　${st.name}`:`ステージ${cur}　${st.name}`)+(fly?'　[そらとびモード]':''); }
+function updFly(){ $('hudStage').textContent=(cur===EX?`EX　${st.name}`:building()?'じゅんび編　ステージをつくろう':`ステージ${cur}　${st.name}`)+(fly?'　[そらとびモード]':''); }
 function apply(fromButton){
   code[tab]=ta.value;
   save.codes[cur]={...code}; save.cur=cur; persist();
@@ -855,7 +889,7 @@ function apply(fromButton){
   const warns=lint();
   if(fromButton){ vp.focus({preventScroll:true});
     if(warns) toast('コードに気になるところがあります。エディタの下を見てみよう',4000);
-    else if(toastEl.hidden) toast('反映しました！ 矢印キーで動かそう'); }
+    else if(toastEl.hidden) toast(building()?'反映しました！':'反映しました！ 矢印キーで動かそう'); }
 }
 function respawn(full){
   p.x=40; p.y=H-60-p.h; p.vx=0; p.vy=0; p.ground=true; p.coyote=0;
@@ -866,6 +900,17 @@ function respawn(full){
 /* ---------- チュートリアルのチェック ---------- */
 function checkTutorial(){
   if(cur!==0) return;
+  if(building()){
+    const blocks=els.solid.filter(e=>e.classList.contains('block'));
+    const done={P1:blocks.length>0,
+      P2:blocks.some(e=>Math.abs(e.offsetLeft-TARGET.left)<=24&&Math.abs((H-e.offsetTop-e.offsetHeight)-TARGET.bottom)<=24),
+      P3:blocks.some(e=>getComputedStyle(e).backgroundColor!=='rgb(201, 133, 63)'),
+      P4:getComputedStyle(player).backgroundColor!==DEF.color};
+    document.querySelectorAll('#mission [data-check]').forEach(li=>li.classList.toggle('done',!!done[li.dataset.check]));
+    const all=done.P1&&done.P2&&done.P3&&done.P4, box=$('jsOn');
+    if(box){ if(all&&box.hidden) toast('じゅんび完了！ ミッションの下の「JavaScript をオン」をおそう',5000); box.hidden=!all; }
+    return;
+  }
   const done={A:els.solid.some(e=>e.classList.contains('block')), B:prm.jump>=14, C:getComputedStyle(player).backgroundColor!==DEF.color};
   document.querySelectorAll('#mission [data-check]').forEach(li=>li.classList.toggle('done',!!done[li.dataset.check]));
 }
@@ -898,7 +943,7 @@ function hold(btn,key){
 hold($('padL'),'l'); hold($('padR'),'r'); hold($('padJ'),'j');
 $('retryBtn').addEventListener('click',()=>{respawn(true);vp.focus({preventScroll:true});});
 vp.addEventListener('pointerdown',()=>vp.focus({preventScroll:true}));
-const updHint=()=>{$('focusHint').hidden=document.activeElement===vp||run.started;};
+const updHint=()=>{$('focusHint').hidden=document.activeElement===vp||run.started||building();};
 vp.addEventListener('focus',updHint); vp.addEventListener('blur',updHint);
 layer.addEventListener('input',e=>{
   const el=e.target;
@@ -919,7 +964,7 @@ function rectOf(el){
   return {x:(r.left-wr.left)/sc,y:(r.top-wr.top)/sc,w:r.width/sc,h:r.height/sc};
 }
 function step(){
-  if(run.done) return;
+  if(run.done||building()) return;
   const dir=(inp.r?1:0)-(inp.l?1:0);
   if(!run.started&&(dir||inp.jumpBuf>0)){ run.started=true; updHint(); }
   if(run.started) run.frames++;
@@ -953,7 +998,7 @@ function render(){
   player.classList.toggle('face-left',p.face<0);
   const cam=clamp(p.x+p.w/2-VW/2,0,st.W-VW);
   world.style.transform=`translateX(${-cam}px)`;
-  $('hudTime').textContent=(run.frames/60).toFixed(2)+' 秒';
+  $('hudTime').textContent=building()?'':(run.frames/60).toFixed(2)+' 秒';
   const b=save.best[cur]; $('hudBest').textContent=b!=null?`ベスト ${b.toFixed(2)} 秒`:'';
 }
 let acc=0,last=performance.now(),tick=0;
@@ -1031,6 +1076,17 @@ $('resetBtn').addEventListener('click',()=>{
   const s=STAGES[cur]; code={html:s.html,css:s.css,js:PLAYER_JS}; ta.value=code[tab]; renderHL(); apply(false); toast('ステージのコードを最初にもどしました');
 });
 $('applyBtn').addEventListener('click',()=>apply(true));
+
+/* ---------- じゅんび編から本編へ ---------- */
+function startPlay(skipped){
+  save.prep=true; persist(); inp.jumpBuf=0;
+  buildSys(); apply(false); updHint(); vp.focus({preventScroll:true});
+  toast(skipped?'じゅんび編をとばしました。矢印キーで動かそう':'JavaScript オン！ さんちゃんが動き出した。矢印キーで動かそう',5000);
+}
+$('mission').addEventListener('click',e=>{
+  if(e.target.closest('#jsOnBtn')) startPlay(false);
+  else if(e.target.closest('#prepSkip')) startPlay(true);
+});
 
 /* ---------- コピー ---------- */
 $('mission').addEventListener('click',e=>{
